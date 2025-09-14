@@ -25,7 +25,7 @@ export class Assignment1Stack extends cdk.Stack {
 
         // EC2 Instance - Ubuntu 22.04 LTS t3.micro
         const instance = new ec2.Instance(this, 'VirtLabInstance', {
-            instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MEDIUM),
+            instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
             machineImage: ec2.MachineImage.genericLinux({
                 'us-east-1': 'ami-0bbdd8c17ed981ef9',
             }),
