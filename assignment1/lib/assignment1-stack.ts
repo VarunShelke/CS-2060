@@ -8,7 +8,7 @@ export class Assignment1Stack extends cdk.Stack {
 
         // Create VPC
         const vpc = new ec2.Vpc(this, 'VirtLabVPC', {
-            maxAzs: 2
+            maxAzs: 1
         });
 
         // Security Group for SSH access
@@ -30,6 +30,9 @@ export class Assignment1Stack extends cdk.Stack {
                 'us-east-1': 'ami-0bbdd8c17ed981ef9',
             }),
             vpc: vpc,
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PUBLIC
+            },
             securityGroup: securityGroup,
             keyPair: keyPair,
             blockDevices: [
@@ -44,9 +47,9 @@ export class Assignment1Stack extends cdk.Stack {
 
         // Outputs
         new cdk.CfnOutput(this, 'InstanceId', {value: instance.instanceId});
-        new cdk.CfnOutput(this, 'PublicIP', {value: instance.instancePublicIp});
+        new cdk.CfnOutput(this, 'PublicIP', {value: instance.instancePublicDnsName});
         new cdk.CfnOutput(this, 'SSHCommand', {
-            value: `ssh -i virt-lab-key.pem ubuntu@${instance.instancePublicIp}`
+            value: `ssh -i virt-lab-key.pem ubuntu@${instance.instancePublicDnsName}`
         });
     }
 }
