@@ -6,9 +6,14 @@ export class Assignment1Stack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
+        // Create VPC
+        const vpc = new ec2.Vpc(this, 'VirtLabVPC', {
+            maxAzs: 2
+        });
+
         // Security Group for SSH access
         const securityGroup = new ec2.SecurityGroup(this, 'VirtLabSG', {
-            vpc: ec2.Vpc.fromLookup(this, 'DefaultVPC', {isDefault: true}),
+            vpc: vpc,
             allowAllOutbound: true
         });
         securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'SSH access');
@@ -20,14 +25,21 @@ export class Assignment1Stack extends cdk.Stack {
 
         // EC2 Instance - Ubuntu 22.04 LTS t3.micro
         const instance = new ec2.Instance(this, 'VirtLabInstance', {
-            instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
-            machineImage: ec2.MachineImage.lookup({
-                name: 'ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*',
-                owners: ['099720109477']
+            instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MEDIUM),
+            machineImage: ec2.MachineImage.genericLinux({
+                'us-east-1': 'ami-0bbdd8c17ed981ef9',
             }),
-            vpc: ec2.Vpc.fromLookup(this, 'VPC', {isDefault: true}),
+            vpc: vpc,
             securityGroup: securityGroup,
-            keyPair: keyPair
+            keyPair: keyPair,
+            blockDevices: [
+                {
+                    deviceName: '/dev/sda1',
+                    volume: ec2.BlockDeviceVolume.ebs(20, {
+                        volumeType: ec2.EbsDeviceVolumeType.GP3
+                    })
+                }
+            ]
         });
 
         // Outputs
